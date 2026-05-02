@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ministério Evangélico Enraizados — Sistema de Gestão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════ */
+:root{
+  --o900:#1E2A08; --o800:#2C3F0D; --o700:#3D4A1A; --o600:#4E5F22;
+  --o500:#5C6B2E; --o400:#7A8C40; --o300:#9AAD5A; --o200:#BDD088;
+  --o100:#DEE9BB; --o50:#F2F7E8;
+  --g900:#C49A2A; --g800:#D4AB38; --g700:#E8C96A; --g600:#F0D888;
+  --black:#0F1409; --gray900:#1C1C1C; --gray800:#2C2C2C;
+  --gray700:#444; --gray500:#888; --gray300:#CCC; --gray100:#F5F5F5;
+  --white:#FDFCF8;
+  --red:#8B2A2A; --red-light:#D96060;
+  --green-text:#4CAF50; --blue-text:#5B9BD5;
+  --radius-sm:6px; --radius-md:10px; --radius-lg:16px; --radius-xl:24px;
+  --shadow-sm:0 1px 4px rgba(0,0,0,.15);
+  --shadow-md:0 4px 20px rgba(0,0,0,.25);
+  --shadow-lg:0 12px 48px rgba(0,0,0,.4);
+  --shadow-xl:0 24px 80px rgba(0,0,0,.6);
+  --transition:.18s ease;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--o700);color:var(--white);min-height:100vh;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+input,select,textarea,button{font-family:'Inter',sans-serif}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--o800)}
+::-webkit-scrollbar-thumb{background:var(--o400);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--o300)}
+img{display:block}
+
+/* ═══════════════════════════════════════════════
+   TOAST / SAVE INDICATOR
+═══════════════════════════════════════════════ */
+#toast{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  display:flex;align-items:center;gap:10px;
+  background:var(--o800);border:1px solid var(--o400);
+  border-radius:var(--radius-md);padding:10px 18px;
+  box-shadow:var(--shadow-lg);
+  font-size:13px;font-weight:500;color:var(--o200);
+  opacity:0;transform:translateY(12px);
+  transition:opacity .3s,transform .3s;
+  pointer-events:none;
+}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast .toast-icon{font-size:15px}
+
+/* ═══════════════════════════════════════════════
+   LOGIN
+═══════════════════════════════════════════════ */
+#login-screen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 40% 50%, var(--o800) 0%, var(--o900) 60%, #0A0F03 100%);
+  padding:24px;position:relative;overflow:hidden;
+}
+#login-screen::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%235C6B2E' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity:1;
+}
+.login-card{
+  position:relative;z-index:1;
+  background:linear-gradient(145deg,rgba(46,59,18,.95) 0%,rgba(20,20,20,.98) 100%);
+  border:1px solid rgba(196,154,42,.25);border-radius:var(--radius-xl);
+  padding:48px 44px 40px;width:100%;max-width:420px;
+  box-shadow:var(--shadow-xl),0 0 0 1px rgba(92,107,46,.1);
+  backdrop-filter:blur(20px);
+}
+.login-logo-wrap{
+  width:76px;height:76px;border-radius:50%;
+  border:2px solid rgba(196,154,42,.4);
+  background:linear-gradient(135deg,var(--o700),var(--o900));
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;font-size:32px;
+  box-shadow:0 0 32px rgba(196,154,42,.15);
+}
+.login-card h1{
+  font-family:'Cinzel',serif;font-size:18px;font-weight:700;
+  color:var(--g900);text-align:center;letter-spacing:.8px;line-height:1.3;
+  margin-bottom:4px;
+}
+.login-card .login-sub{
+  text-align:center;font-size:11px;color:var(--o300);
+  letter-spacing:3px;text-transform:uppercase;margin-bottom:32px;
+}
+.login-divider{
+  display:flex;align-items:center;gap:12px;margin-bottom:28px;
+}
+.login-divider::before,.login-divider::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(to right,transparent,rgba(196,154,42,.3),transparent);
+}
+.login-divider span{
+  font-family:'Cinzel',serif;font-size:10px;color:rgba(196,154,42,.5);
+  letter-spacing:2px;white-space:nowrap;
+}
+.form-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.form-field label{
+  font-size:10px;font-weight:600;letter-spacing:1.5px;
+  color:var(--g900);text-transform:uppercase;
+}
+.form-field input,.form-field select,.form-field textarea{
+  background:rgba(0,0,0,.35);border:1px solid rgba(92,107,46,.4);
+  border-radius:var(--radius-sm);padding:11px 14px;
+  color:var(--white);font-size:14px;outline:none;
+  transition:border-color var(--transition),box-shadow var(--transition);
+}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{
+  border-color:rgba(196,154,42,.6);
+  box-shadow:0 0 0 3px rgba(196,154,42,.08);
+}
+.form-field input::placeholder{color:rgba(168,184,122,.35)}
+.login-error-box{
+  background:rgba(139,42,42,.2);border:1px solid rgba(139,42,42,.5);
+  border-radius:var(--radius-sm);padding:10px 14px;
+  font-size:13px;color:var(--red-light);margin-bottom:16px;
+  display:none;align-items:center;gap:8px;
+}
+.login-error-box.show{display:flex}
+.btn-login{
+  width:100%;padding:13px;margin-top:4px;
+  background:linear-gradient(135deg,var(--g900) 0%,var(--g700) 100%);
+  border:none;border-radius:var(--radius-sm);
+  font-family:'Cinzel',serif;font-size:11px;font-weight:700;
+  letter-spacing:2.5px;color:var(--black);cursor:pointer;
+  transition:all var(--transition);
+  box-shadow:0 4px 16px rgba(196,154,42,.2);
+}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(196,154,42,.35);filter:brightness(1.05)}
+.btn-login:active{transform:translateY(0)}
+.login-hint{text-align:center;font-size:11px;color:rgba(168,184,122,.35);margin-top:16px}
+
+/* ═══════════════════════════════════════════════
+   MAIN LAYOUT
+═══════════════════════════════════════════════ */
+#main-app{display:flex;flex-direction:column;min-height:100vh;background:linear-gradient(160deg,var(--o800) 0%,#1E2A0A 50%,var(--o800) 100%)}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:linear-gradient(to right,var(--black),var(--o800),var(--black));
+  border-bottom:1px solid rgba(196,154,42,.2);
+  padding:0 24px;display:flex;align-items:center;gap:16px;
+  min-height:72px;position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 24px rgba(0,0,0,.4);
+  backdrop-filter:blur(10px);
+}
+.topbar-logo{
+  position:relative;width:52px;height:52px;border-radius:50%;
+  border:2px solid rgba(196,154,42,.35);overflow:hidden;
+  cursor:pointer;flex-shrink:0;
+  background:linear-gradient(135deg,var(--o600),var(--o800));
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color var(--transition),transform var(--transition);
+  group:hover;
+}
+.topbar-logo:hover{border-color:var(--g900);transform:scale(1.04)}
+.topbar-logo img{width:100%;height:100%;object-fit:cover}
+.topbar-logo .logo-ph{font-size:20px;color:var(--o300)}
+.topbar-logo .logo-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity var(--transition);font-size:16px;
+}
+.topbar-logo:hover .logo-overlay{opacity:1}
+#logo-file{display:none}
+
+.topbar-info{flex:1;min-width:0}
+.topbar-info h1{
+  font-family:'Cinzel',serif;font-size:16px;font-weight:700;
+  color:var(--g900);letter-spacing:.8px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.topbar-info p{font-size:10px;color:var(--o300);letter-spacing:2.5px;text-transform:uppercase;margin-top:1px}
+
+.topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.saldo-chip{
+  background:rgba(0,0,0,.25);border:1px solid rgba(92,107,46,.35);
+  border-radius:8px;padding:6px 14px;text-align:right;
+}
+.saldo-chip .lbl{font-size:9px;font-weight:600;color:var(--o300);letter-spacing:2px;text-transform:uppercase;display:block}
+.saldo-chip .val{font-family:'Cinzel',serif;font-size:15px;font-weight:700}
+.save-indicator{
+  display:flex;align-items:center;gap:5px;
+  font-size:10px;color:var(--o400);letter-spacing:1px;
+  opacity:0;transition:opacity .4s;
+}
+.save-indicator.visible{opacity:1}
+.save-indicator .dot{width:6px;height:6px;border-radius:50%;background:var(--o300);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* topbar buttons */
+.tbtn{
+  background:rgba(92,107,46,.15);border:1px solid rgba(92,107,46,.3);
+  border-radius:var(--radius-sm);padding:7px 12px;
+  color:var(--o200);cursor:pointer;font-size:12px;font-weight:500;
+  transition:all var(--transition);display:flex;align-items:center;gap:6px;
+  white-space:nowrap;
+}
+.tbtn:hover{background:rgba(92,107,46,.3);border-color:var(--o400);color:var(--white)}
+.tbtn.tbtn-exit{
+  background:rgba(139,42,42,.12);border-color:rgba(139,42,42,.3);color:var(--red-light);
+}
+.tbtn.tbtn-exit:hover{background:rgba(139,42,42,.25);border-color:var(--red);color:#FF9090}
+
+/* ── SIDEBAR NAV ── */
+.layout{display:flex;flex:1}
+.sidebar{
+  width:220px;flex-shrink:0;
+  background:linear-gradient(to bottom,var(--o900),#0F1409);
+  border-right:1px solid rgba(92,107,46,.2);
+  padding:20px 0;position:sticky;top:72px;height:calc(100vh - 72px);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+.sidebar-section{margin-bottom:8px}
+.sidebar-section-title{
+  font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;
+  color:rgba(168,184,122,.35);padding:0 20px;margin-bottom:4px;
+}
+.snav-btn{
+  width:100%;background:transparent;border:none;
+  padding:9px 20px;display:flex;align-items:center;gap:10px;
+  cursor:pointer;transition:all var(--transition);
+  color:var(--o300);font-size:13px;font-weight:400;
+  border-left:3px solid transparent;text-align:left;
+  position:relative;
+}
+.snav-btn .snav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.snav-btn .snav-label{flex:1}
+.snav-btn .snav-badge{
+  background:var(--o600);color:var(--white);border-radius:10px;
+  padding:1px 7px;font-size:9px;font-weight:700;
+}
+.snav-btn:hover{background:rgba(92,107,46,.12);color:var(--white);border-left-color:rgba(92,107,46,.4)}
+.snav-btn.active{background:rgba(196,154,42,.08);color:var(--g900);border-left-color:var(--g900);font-weight:600}
+.snav-btn.active .snav-badge{background:var(--g900);color:var(--black)}
+.snav-btn.bday-nav{--ac:#F9A825}
+.snav-btn.bday-nav.active{color:#F9A825;border-left-color:#F9A825;background:rgba(249,168,37,.07)}
+.snav-btn.rep-nav.active{color:#7EB8D4;border-left-color:#7EB8D4;background:rgba(126,184,212,.07)}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid rgba(92,107,46,.15)}
+.sidebar-footer-text{font-size:10px;color:rgba(168,184,122,.25);letter-spacing:1px;text-align:center;line-height:1.6}
+
+/* ── CONTENT ── */
+.content{flex:1;padding:24px;min-width:0;overflow:hidden}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px}
+.stat-card{
+  background:linear-gradient(145deg,rgba(46,59,18,.6),rgba(20,20,20,.7));
+  border:1px solid rgba(92,107,46,.25);border-radius:var(--radius-md);
+  padding:14px 16px;transition:border-color var(--transition),transform var(--transition);
+}
+.stat-card:hover{border-color:rgba(196,154,42,.3);transform:translateY(-1px)}
+.stat-card .sv{font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--g900);display:block;margin-bottom:2px}
+.stat-card .sl{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--o400);display:block}
+
+/* ── PANEL ── */
+.panel{
+  background:linear-gradient(145deg,rgba(36,48,14,.75),rgba(18,18,18,.85));
+  border:1px solid rgba(92,107,46,.25);border-radius:var(--radius-lg);
+  overflow:hidden;box-shadow:var(--shadow-md);
+}
+.panel-head{
+  background:linear-gradient(to right,rgba(15,20,5,.9),rgba(46,59,18,.6));
+  border-bottom:1px solid rgba(196,154,42,.15);
+  padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.panel-title{
+  font-family:'Cinzel',serif;font-size:13px;font-weight:700;
+  color:var(--g900);letter-spacing:.5px;display:flex;align-items:center;gap:10px;
+}
+.count-pill{
+  background:rgba(92,107,46,.3);color:var(--o200);
+  border-radius:20px;padding:2px 10px;font-size:10px;font-weight:700;
+  font-family:'Inter',sans-serif;border:1px solid rgba(92,107,46,.3);
+}
+
+/* toolbar */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search-input{
+  background:rgba(0,0,0,.3);border:1px solid rgba(92,107,46,.3);
+  border-radius:var(--radius-sm);padding:7px 12px;
+  color:var(--white);font-size:13px;outline:none;min-width:180px;
+  transition:border-color var(--transition),box-shadow var(--transition);
+}
+.search-input:focus{border-color:rgba(196,154,42,.5);box-shadow:0 0 0 3px rgba(196,154,42,.06)}
+.search-input::placeholder{color:rgba(168,184,122,.3)}
+
+/* ── BUTTONS ── */
+.btn{
+  font-size:11px;font-weight:600;letter-spacing:.8px;
+  padding:8px 16px;border:none;border-radius:var(--radius-sm);
+  cursor:pointer;transition:all var(--transition);
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.btn-gold{background:linear-gradient(135deg,var(--g900),var(--g700));color:var(--black)}
+.btn-gold:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 4px 14px rgba(196,154,42,.3)}
+.btn-olive{background:linear-gradient(135deg,var(--o500),var(--o400));color:var(--white)}
+.btn-olive:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn-blue{background:linear-gradient(135deg,#1E5F7A,#2E8BAA);color:var(--white)}
+.btn-blue:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 14px rgba(46,139,170,.3)}
+.btn-ghost{background:transparent;border:1px solid rgba(92,107,46,.35);color:var(--o300)}
+.btn-ghost:hover{border-color:var(--o400);color:var(--white);background:rgba(92,107,46,.15)}
+.btn-danger-ghost{background:transparent;border:1px solid rgba(139,42,42,.35);color:var(--red-light);padding:5px 10px;font-size:10px}
+.btn-danger-ghost:hover{background:rgba(139,42,42,.2);border-color:var(--red);color:#FF9090}
+.btn-edit-ghost{background:transparent;border:1px solid rgba(92,107,46,.3);color:var(--o300);padding:5px 10px;font-size:10px;margin-right:4px}
+.btn-edit-ghost:hover{background:rgba(92,107,46,.2);border-color:var(--o400);color:var(--white)}
+
+/* ── FILTER TABS ── */
+.filter-bar{display:flex;gap:4px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid rgba(92,107,46,.12)}
+.ftab{
+  background:transparent;border:1px solid rgba(92,107,46,.25);
+  color:var(--o400);padding:4px 12px;border-radius:20px;
+  cursor:pointer;font-size:11px;font-weight:500;transition:all var(--transition);
+}
+.ftab:hover{border-color:var(--o400);color:var(--white)}
+.ftab.active{background:var(--o500);border-color:var(--o500);color:var(--white);font-weight:600}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{position:sticky;top:0;z-index:1}
+thead tr{background:rgba(10,15,3,.8);backdrop-filter:blur(4px)}
+th{
+  font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(196,154,42,.7);
+  padding:10px 14px;text-align:left;text-transform:uppercase;white-space:nowrap;
+  border-bottom:1px solid rgba(196,154,42,.12);
+}
+tbody tr{border-bottom:1px solid rgba(92,107,46,.12);transition:background var(--transition)}
+tbody tr:hover{background:rgba(92,107,46,.1)}
+td{padding:10px 14px;color:rgba(255,255,255,.85);font-size:13px}
+td.mono{font-family:'Cinzel',serif;font-size:12px}
+.empty-row td{text-align:center;color:var(--o400);font-style:italic;padding:40px;font-size:13px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.bdg-dizimo{background:rgba(92,107,46,.2);color:var(--o200);border:1px solid rgba(92,107,46,.3)}
+.bdg-oferta{background:rgba(196,154,42,.15);color:var(--g700);border:1px solid rgba(196,154,42,.25)}
+.bdg-despesa{background:rgba(139,42,42,.15);color:#E88080;border:1px solid rgba(139,42,42,.25)}
+.bdg-membro{background:rgba(91,155,213,.1);color:#90C4E8;border:1px solid rgba(91,155,213,.2)}
+
+/* ── FIN CARDS ── */
+.fin-row{display:grid;gap:10px;margin-bottom:16px}
+.fin-c3{grid-template-columns:repeat(3,1fr)}
+.fin-c4{grid-template-columns:repeat(4,1fr)}
+.fin-c2{grid-template-columns:1fr 1fr}
+.fin-card{
+  background:rgba(0,0,0,.25);border:1px solid rgba(92,107,46,.2);
+  border-radius:var(--radius-md);padding:14px 16px;text-align:center;
+}
+.fin-card .fa{font-family:'Cinzel',serif;font-size:16px;font-weight:700;display:block;margin-bottom:3px}
+.fin-card .fl{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--o400)}
+.c-green{color:#6FCF97}.c-gold{color:var(--g900)}.c-red{color:#E88080}.c-blue{color:#7EB8D4}.c-gray{color:var(--gray500)}
+
+/* ── MODAL ── */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  z-index:500;display:flex;align-items:center;justify-content:center;
+  padding:20px;backdrop-filter:blur(4px);
+}
+.modal{
+  background:linear-gradient(145deg,#1E2A08,#1C1C1C);
+  border:1px solid rgba(196,154,42,.2);border-radius:var(--radius-lg);
+  width:100%;max-width:540px;max-height:90vh;overflow:hidden;
+  display:flex;flex-direction:column;
+  box-shadow:var(--shadow-xl);
+}
+.modal-head{
+  background:linear-gradient(to right,rgba(10,15,3,.9),rgba(36,48,14,.7));
+  border-bottom:1px solid rgba(196,154,42,.15);
+  padding:16px 22px;display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.modal-head h2{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--g900);letter-spacing:.5px}
+.modal-close{background:transparent;border:none;color:var(--o400);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:color var(--transition),background var(--transition)}
+.modal-close:hover{color:var(--red-light);background:rgba(139,42,42,.15)}
+.modal-body{padding:22px;overflow-y:auto;flex:1}
+
+/* ── FORM GRID ── */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fgrid .full{grid-column:1/-1}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--g900);text-transform:uppercase}
+.fg input,.fg select,.fg textarea{
+  background:rgba(0,0,0,.3);border:1px solid rgba(92,107,46,.3);
+  border-radius:var(--radius-sm);padding:9px 12px;color:var(--white);
+  font-size:13px;outline:none;transition:border-color var(--transition),box-shadow var(--transition);
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{
+  border-color:rgba(196,154,42,.5);box-shadow:0 0 0 3px rgba(196,154,42,.06);
+}
+.fg select option{background:#1C1C1C}
+.fg input::placeholder{color:rgba(168,184,122,.25)}
+.form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid rgba(92,107,46,.15)}
+
+/* ── BIRTHDAY ── */
+.month-scroller{display:flex;gap:5px;flex-wrap:wrap;padding:14px 20px 8px}
+.mtab{
+  background:transparent;border:1px solid rgba(92,107,46,.25);
+  color:var(--o400);padding:5px 12px;border-radius:20px;
+  cursor:pointer;font-size:10px;font-weight:600;transition:all var(--transition);
+}
+.mtab:hover{border-color:var(--o400);color:var(--white)}
+.mtab.active{
+  background:linear-gradient(135deg,#F9A825,#FFD54F);
+  color:var(--black);border-color:#F9A825;
+}
+.bday-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px;padding:16px 20px 20px}
+.bday-card{
+  background:linear-gradient(145deg,rgba(36,48,14,.6),rgba(18,18,18,.8));
+  border:1px solid rgba(249,168,37,.2);border-radius:var(--radius-md);
+  padding:18px;text-align:center;position:relative;overflow:hidden;
+  transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition);
+}
+.bday-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(249,168,37,.12)}
+.bday-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,#F9A825,transparent)}
+.bday-card.is-today{border-color:rgba(255,213,79,.45);box-shadow:0 0 24px rgba(255,213,79,.08)}
+.bday-avatar{
+  width:52px;height:52px;border-radius:50%;margin:0 auto 12px;
+  background:linear-gradient(135deg,var(--o500),var(--o800));
+  border:2px solid rgba(249,168,37,.5);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--g700);
+}
+.bday-name{font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--white);margin-bottom:5px;line-height:1.3}
+.bday-date{font-size:12px;color:#F9A825;margin-bottom:4px}
+.bday-tipo{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--o400)}
+.today-tag{
+  display:inline-block;background:linear-gradient(135deg,#F9A825,#FFD54F);
+  color:var(--black);font-size:8px;font-weight:800;letter-spacing:1px;
+  padding:2px 6px;border-radius:6px;margin-left:6px;vertical-align:middle;
+}
+.balloon{position:absolute;top:8px;right:10px;font-size:14px;animation:sway 2s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.bday-empty{text-align:center;padding:48px 20px;color:var(--o400);font-size:13px;font-style:italic}
+
+/* ── REPORTS ── */
+.rep-controls{padding:16px 20px;display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;border-bottom:1px solid rgba(92,107,46,.12)}
+.rc-group{display:flex;flex-direction:column;gap:5px}
+.rc-group label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--g900)}
+.rc-group select{
+  background:rgba(0,0,0,.3);border:1px solid rgba(92,107,46,.3);
+  border-radius:var(--radius-sm);padding:8px 12px;color:var(--white);
+  font-size:13px;outline:none;min-width:150px;transition:border-color var(--transition);
+}
+.rc-group select:focus{border-color:rgba(196,154,42,.5)}
+.rc-group select option{background:#1C1C1C}
+.result-box{
+  border-radius:var(--radius-md);padding:16px 20px;margin-top:14px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+}
+.result-box.pos{background:rgba(92,107,46,.15);border:1px solid rgba(92,107,46,.25)}
+.result-box.neg{background:rgba(139,42,42,.12);border:1px solid rgba(139,42,42,.2)}
+.rl{font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--g900);letter-spacing:1px}
+.rv{font-family:'Cinzel',serif;font-size:22px;font-weight:700}
+.print-cta{text-align:center;padding:16px 0 4px}
+.print-cta-note{font-size:11px;color:var(--blue-text);font-style:italic;margin-top:6px}
+
+/* ── SETTINGS ── */
+.sett-section{margin-bottom:20px}
+.sett-title{font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--g900);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(92,107,46,.2)}
+.sett-title.danger{color:var(--red-light)}
+.feedback-ok{background:rgba(92,107,46,.2);border:1px solid rgba(92,107,46,.3);border-radius:var(--radius-sm);padding:9px 13px;font-size:12px;color:var(--o200);margin-top:12px}
+.feedback-err{background:rgba(139,42,42,.2);border:1px solid rgba(139,42,42,.3);border-radius:var(--radius-sm);padding:9px 13px;font-size:12px;color:var(--red-light);margin-top:12px}
+
+/* ── SECTION LABEL ── */
+.sec-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.sec-pad{padding:16px 20px}
+
+/* ── PAGE FOOTER ── */
+.page-footer{text-align:center;padding:20px 0 4px;margin-top:24px}
+.page-footer span{font-family:'Cinzel',serif;font-size:9px;color:rgba(92,107,46,.4);letter-spacing:3px}
+
+/* ── LOGO UPLOAD PREVIEW ── */
+.logo-upload-area{
+  border:2px dashed rgba(92,107,46,.4);border-radius:var(--radius-md);
+  padding:20px;text-align:center;cursor:pointer;transition:all var(--transition);
+  position:relative;overflow:hidden;
+}
+.logo-upload-area:hover{border-color:var(--g900);background:rgba(196,154,42,.04)}
+.logo-upload-area.has-logo{border-style:solid;border-color:rgba(196,154,42,.3);padding:10px}
+.logo-upload-area img{width:80px;height:80px;object-fit:cover;border-radius:50%;margin:0 auto;border:2px solid rgba(196,154,42,.3)}
+.logo-upload-label{font-size:11px;color:var(--o400);margin-top:8px;display:block}
+.logo-upload-hint{font-size:10px;color:rgba(168,184,122,.35);margin-top:4px}
+
+/* ═══════════════════════════════════════════════
+   PRINT
+═══════════════════════════════════════════════ */
+@media print{
+  body{background:#fff!important;color:#000!important}
+  .no-print{display:none!important}
+  .print-only{display:block!important}
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════ */
+@media(max-width:900px){
+  .sidebar{display:none}
+  .stats-row{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:600px){
+  .content{padding:14px}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .fgrid{grid-template-columns:1fr}
+  .fin-c3,.fin-c4{grid-template-columns:1fr}
+  .topbar-info h1{font-size:13px}
+  .topbar{padding:0 12px;gap:10px}
+  .bday-grid{grid-template-columns:1fr 1fr}
+  .topbar-right{gap:6px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ TOAST ═══ -->
+<div id="toast"><span class="toast-icon">💾</span><span id="toast-msg">Salvo automaticamente</span></div>
+
+<!-- ═══ APP ROOT ═══ -->
+<div id="app"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════
+const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const CATS=['Aluguel / Manutenção','Energia / Água','Som / Mídia','Material de Limpeza','Eventos / Cultos','Missões','Secretaria','Outros'];
+const CARGOS=['Pastor','Evangelista','Diácono','Diaconisa','Presbítero','Líder de Louvor','Secretário(a)','Tesoureiro(a)','Outro'];
+
+// ═══════════════════════════════════════════════════
+// STORAGE & UTILS
+// ═══════════════════════════════════════════════════
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const today=()=>new Date().toISOString().split('T')[0];
+const brl=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const ls=(k)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch{return null}};
+const ss=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+
+let _toastTimer=null;
+function showToast(msg='Salvo automaticamente'){
+  const t=document.getElementById('toast');
+  const m=document.getElementById('toast-msg');
+  if(t&&m){m.textContent=msg;t.classList.add('show');clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove('show'),2200)}
+}
+
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+const ST={
+  loggedIn:false,
+  tab:'membros',
+  logo:ls('igr-logo')||null,
+  membros:ls('igr-membros')||[],
+  congregados:ls('igr-congregados')||[],
+  obreiros:ls('igr-obreiros')||[],
+  entradas:ls('igr-entradas')||[],
+  dispensas:ls('igr-dispensas')||[],
+  search:{membros:'',congregados:'',obreiros:'',entradas:'',dispensas:''},
+  filter:{entradas:'Todos',dispensas:'Todos'},
+  bday:{month:new Date().getMonth()},
+  report:{tipo:'mensal',mes:new Date().getMonth(),ano:new Date().getFullYear()},
+  modal:null,
+  saving:false,
+};
+
+let _saveTimer=null;
+function autoSave(key,toastMsg){
+  const data=key==='logo'?ST.logo:ST[key];
+  ss('igr-'+key,data);
+  showToast(toastMsg||'Dados salvos automaticamente ✓');
+  // show saving indicator
+  const ind=document.getElementById('save-ind');
+  if(ind){ind.classList.add('visible');clearTimeout(_saveTimer);_saveTimer=setTimeout(()=>ind&&ind.classList.remove('visible'),2000)}
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER ENGINE
+// ═══════════════════════════════════════════════════
+function render(){
+  const app=document.getElementById('app');
+  if(!ST.loggedIn){app.innerHTML=renderLogin();bindLogin();return}
+  const tE=ST.entradas.reduce((s,r)=>s+Number(r.valor||0),0);
+  const tD=ST.dispensas.reduce((s,r)=>s+Number(r.valor||0),0);
+  const saldo=tE-tD;
+  const todayM=new Date().getMonth();
+  const bdayCount=[...ST.membros,...ST.congregados,...ST.obreiros]
+    .filter(r=>r.dataNascimento&&parseInt(r.dataNascimento.split('-')[1],10)-1===todayM).length;
+  app.innerHTML=`
+    ${renderTopbar(saldo)}
+    <div class="layout">
+      ${renderSidebar(bdayCount)}
+      <div class="content">
+        ${renderStats(tE,tD,saldo)}
+        ${renderSection()}
+        <div class="page-footer"><span>✝ MINISTÉRIO EVANGÉLICO ENRAIZADOS — SISTEMA DE GESTÃO ✝</span></div>
+      </div>
+    </div>
+    ${ST.modal?renderModal():''}
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════
+function renderLogin(){
+  return `<div id="login-screen">
+    <div class="login-card">
+      <div class="login-logo-wrap">✝</div>
+      <h1>Ministério Evangélico Enraizados</h1>
+      <p class="login-sub">Sistema de Gestão</p>
+      <div class="login-divider"><span>ACESSO SEGURO</span></div>
+      <div id="login-err" class="login-error-box"><span>⚠</span><span id="login-err-msg"></span></div>
+      <div class="form-field"><label>Usuário</label><input id="l-user" type="text" placeholder="Digite seu usuário" autocomplete="username"></div>
+      <div class="form-field"><label>Senha</label><input id="l-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+      <button class="btn-login" onclick="doLogin()">ENTRAR</button>
+      <p class="login-hint">Acesso padrão: admin / 1234</p>
+    </div>
+  </div>`;
+}
+function bindLogin(){
+  document.getElementById('l-user')?.focus();
+  ['l-user','l-pass'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()}));
+}
+function doLogin(){
+  const u=document.getElementById('l-user')?.value.trim();
+  const p=document.getElementById('l-pass')?.value;
+  const creds=ls('igr-credentials')||{usuario:'admin',senha:'1234'};
+  if(u===creds.usuario&&p===creds.senha){ST.loggedIn=true;render()}
+  else{
+    const err=document.getElementById('login-err');
+    const msg=document.getElementById('login-err-msg');
+    if(err&&msg){msg.textContent='Usuário ou senha incorretos.';err.classList.add('show')}
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// TOPBAR
+// ═══════════════════════════════════════════════════
+function renderTopbar(saldo){
+  const logoHtml=ST.logo?`<img src="${ST.logo}" alt="Logo">`:`<span class="logo-ph">✝</span>`;
+  return `<div class="topbar no-print">
+    <div class="topbar-logo" onclick="document.getElementById('logo-file').click()" title="Clique para trocar o logo">
+      ${logoHtml}
+      <div class="logo-overlay">📷</div>
+    </div>
+    <input id="logo-file" type="file" accept="image/*" onchange="handleLogo(this)" style="display:none">
+    <div class="topbar-info">
+      <h1>Ministério Evangélico Enraizados</h1>
+      <p>Sistema de Gestão da Igreja</p>
+    </div>
+    <div class="topbar-right">
+      <div id="save-ind" class="save-indicator"><span class="dot"></span><span>Salvando…</span></div>
+      <div class="saldo-chip">
+        <span class="lbl">Saldo</span>
+        <span class="val" style="color:${saldo>=0?'#6FCF97':'#E88080'}">${brl(saldo)}</span>
+      </div>
+      <button class="tbtn" onclick="openSettings()" title="Configurações">⚙ Config.</button>
+      <button class="tbtn tbtn-exit" onclick="confirmExit()" title="Sair do sistema">⏻ Sair</button>
+    </div>
+  </div>`;
+}
+function handleLogo(input){
+  const f=input.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    ST.logo=ev.target.result;
+    autoSave('logo','Logo salvo com sucesso ✓');
+    render();
+  };
+  reader.readAsDataURL(f);
+}
+function confirmExit(){
+  if(confirm('Deseja realmente sair do sistema?')){ST.loggedIn=false;ST.modal=null;render()}
+}
+
+// ═══════════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════════
+function renderSidebar(bdayCount){
+  const nav=(id,icon,label,cls,badge)=>`
+    <button class="snav-btn ${cls||''} ${ST.tab===id?'active':''}" onclick="setTab('${id}')">
+      <span class="snav-icon">${icon}</span>
+      <span class="snav-label">${label}</span>
+      ${badge!==undefined?`<span class="snav-badge">${badge}</span>`:''}
+    </button>`;
+  return `<aside class="sidebar no-print">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Pessoas</div>
+      ${nav('membros','✝','Membros','',ST.membros.length)}
+      ${nav('congregados','🕊','Congregados','',ST.congregados.length)}
+      ${nav('obreiros','⚓','Obreiros','',ST.obreiros.length)}
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Financeiro</div>
+      ${nav('entradas','📥','Entradas','')}
+      ${nav('dispensas','📤','Dispensas','')}
+      ${nav('relatorios','📊','Relatórios','rep-nav')}
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Agenda</div>
+      ${nav('aniversarios','🎂','Aniversariantes','bday-nav',bdayCount>0?bdayCount:undefined)}
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-text">✝<br>Enraizados em Cristo<br>Colossenses 2:7</div>
+    </div>
+  </aside>`;
+}
+function setTab(id){ST.tab=id;render()}
+
+// ═══════════════════════════════════════════════════
+// STATS ROW
+// ═══════════════════════════════════════════════════
+function renderStats(tE,tD,saldo){
+  const sc=(v,l,c)=>`<div class="stat-card"><span class="sv" style="${c?'color:'+c:''}">${v}</span><span class="sl">${l}</span></div>`;
+  return `<div class="stats-row">
+    ${sc(ST.membros.length,'Membros','')}
+    ${sc(ST.congregados.length,'Congregados','')}
+    ${sc(ST.obreiros.length,'Obreiros','')}
+    ${sc(brl(tE),'Entradas','#6FCF97')}
+    ${sc(brl(tD),'Dispensas','#E88080')}
+    ${sc(brl(saldo),'Saldo',saldo>=0?'#6FCF97':'#E88080')}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// SECTION ROUTER
+// ═══════════════════════════════════════════════════
+function renderSection(){
+  switch(ST.tab){
+    case 'membros':return renderPeople('membros');
+    case 'congregados':return renderPeople('congregados');
+    case 'obreiros':return renderPeople('obreiros');
+    case 'entradas':return renderEntradas();
+    case 'dispensas':return renderDispensas();
+    case 'aniversarios':return renderBirthdays();
+    case 'relatorios':return renderReports();
+    default:return '';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// PEOPLE
+// ═══════════════════════════════════════════════════
+const PCFG={
+  membros:{label:'Membros',icon:'✝',sing:'Membro',cols:['Nome','Telefone','E-mail','Batizado','Ingresso'],row:r=>[r.nome,r.telefone||'—',r.email||'—',r.batizado||'—',r.dataIngresso||'—']},
+  congregados:{label:'Congregados',icon:'🕊',sing:'Congregado',cols:['Nome','Telefone','E-mail','Frequenta desde'],row:r=>[r.nome,r.telefone||'—',r.email||'—',r.dataInicio||'—']},
+  obreiros:{label:'Obreiros',icon:'⚓',sing:'Obreiro',cols:['Nome','Cargo','Telefone','E-mail','Ordenação'],row:r=>[r.nome,r.cargo||'—',r.telefone||'—',r.email||'—',r.dataOrdenacao||'—']},
+};
+const PFIELDS={
+  membros:[{k:'nome',l:'Nome Completo',req:1,full:1},{k:'telefone',l:'Telefone'},{k:'email',l:'E-mail'},{k:'endereco',l:'Endereço',full:1},{k:'dataNascimento',l:'Data Nascimento',t:'date'},{k:'dataIngresso',l:'Data Ingresso',t:'date'},{k:'batizado',l:'Batizado?',t:'sel',opts:['Sim','Não']},{k:'observacoes',l:'Observações',t:'ta',full:1}],
+  congregados:[{k:'nome',l:'Nome Completo',req:1,full:1},{k:'telefone',l:'Telefone'},{k:'email',l:'E-mail'},{k:'endereco',l:'Endereço',full:1},{k:'dataNascimento',l:'Data Nascimento',t:'date'},{k:'dataInicio',l:'Frequenta desde',t:'date'},{k:'observacoes',l:'Observações',t:'ta',full:1}],
+  obreiros:[{k:'nome',l:'Nome Completo',req:1,full:1},{k:'cargo',l:'Cargo / Função',t:'sel',opts:CARGOS},{k:'telefone',l:'Telefone'},{k:'email',l:'E-mail'},{k:'endereco',l:'Endereço',full:1},{k:'dataNascimento',l:'Data Nascimento',t:'date'},{k:'dataOrdenacao',l:'Data Ordenação',t:'date'},{k:'observacoes',l:'Observações',t:'ta',full:1}],
+};
+
+function renderPeople(type){
+  const cfg=PCFG[type];const search=ST.search[type]||'';const data=ST[type];
+  const filtered=data.filter(r=>Object.values(r).some(v=>String(v||'').toLowerCase().includes(search.toLowerCase())));
+  const rows=filtered.length===0
+    ?`<tr class="empty-row"><td colspan="${cfg.cols.length+1}">Nenhum registro cadastrado.</td></tr>`
+    :filtered.map(r=>`<tr>
+      ${cfg.row(r).map(v=>`<td>${esc(String(v))}</td>`).join('')}
+      <td>
+        <button class="btn btn-edit-ghost" onclick="openEdit('${type}','${r.id}')">✏ Editar</button>
+        <button class="btn btn-danger-ghost" onclick="removeRec('${type}','${r.id}')">✕</button>
+      </td>
+    </tr>`).join('');
+  return `<div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">${cfg.icon} ${cfg.label}<span class="count-pill">${data.length}</span></span>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Buscar…" value="${esc(search)}" oninput="setSearch('${type}',this.value)">
+        <button class="btn btn-gold" onclick="openNew('${type}')">+ Novo ${cfg.sing}</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>${cfg.cols.map(c=>`<th>${c}</th>`).join('')}<th>Ações</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+function setSearch(t,v){ST.search[t]=v;render()}
+function openNew(type){ST.modal={type:'person',entity:type,editing:null,form:{}};render()}
+function openEdit(type,id){const r=ST[type].find(x=>x.id===id);if(!r)return;ST.modal={type:'person',entity:type,editing:id,form:{...r}};render()}
+function removeRec(type,id){if(!confirm('Remover este registro permanentemente?'))return;ST[type]=ST[type].filter(r=>r.id!==id);autoSave(type,'Registro removido ✓');render()}
+function saveRec(){
+  const{entity,editing,form}=ST.modal;
+  if(!form.nome?.trim()){alert('Nome é obrigatório.');return}
+  if(editing)ST[entity]=ST[entity].map(r=>r.id===editing?{...form,id:editing}:r);
+  else ST[entity]=[...ST[entity],{...form,id:uid()}];
+  autoSave(entity,'Cadastro salvo automaticamente ✓');
+  ST.modal=null;render();
+}
+
+// ═══════════════════════════════════════════════════
+// ENTRADAS
+// ═══════════════════════════════════════════════════
+function renderEntradas(){
+  const filt=ST.filter.entradas,srch=ST.search.entradas||'',data=ST.entradas;
+  const tD=data.filter(r=>r.tipo==='Dízimo').reduce((s,r)=>s+Number(r.valor||0),0);
+  const tO=data.filter(r=>r.tipo==='Oferta').reduce((s,r)=>s+Number(r.valor||0),0);
+  const filtered=data.filter(r=>(filt==='Todos'||r.tipo===filt)&&Object.values(r).some(v=>String(v||'').toLowerCase().includes(srch.toLowerCase())));
+  const rows=filtered.length===0?`<tr class="empty-row"><td colspan="6">Nenhum lançamento no período.</td></tr>`
+    :filtered.map(r=>`<tr>
+      <td>${r.data||'—'}</td>
+      <td><span class="badge ${r.tipo==='Dízimo'?'bdg-dizimo':'bdg-oferta'}">${r.tipo}</span></td>
+      <td>${esc(r.membro||'—')}</td>
+      <td>${esc(r.descricao||'—')}</td>
+      <td class="mono" style="color:#6FCF97">${brl(r.valor)}</td>
+      <td>
+        <button class="btn btn-edit-ghost" onclick="openEditEntrada('${r.id}')">✏</button>
+        <button class="btn btn-danger-ghost" onclick="removeRec('entradas','${r.id}')">✕</button>
+      </td>
+    </tr>`).join('');
+  return `<div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">📥 Entradas Financeiras</span>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Buscar…" value="${esc(srch)}" oninput="setSearch('entradas',this.value)">
+        <button class="btn btn-gold" onclick="openNewEntrada()">+ Lançar</button>
+      </div>
+    </div>
+    <div class="filter-bar">
+      ${['Todos','Dízimo','Oferta'].map(f=>`<button class="ftab ${filt===f?'active':''}" onclick="setFilter('entradas','${f}')">${f}</button>`).join('')}
+    </div>
+    <div class="sec-pad">
+      <div class="fin-row fin-c3">
+        <div class="fin-card"><span class="fa c-green">${brl(tD+tO)}</span><span class="fl">Total Geral</span></div>
+        <div class="fin-card"><span class="fa c-blue">${brl(tD)}</span><span class="fl">Dízimos</span></div>
+        <div class="fin-card"><span class="fa c-gold">${brl(tO)}</span><span class="fl">Ofertas</span></div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Data</th><th>Tipo</th><th>Membro</th><th>Descrição</th><th>Valor</th><th>Ações</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+function setFilter(t,v){ST.filter[t]=v;render()}
+function openNewEntrada(){ST.modal={type:'entrada',editing:null,form:{tipo:'Dízimo',data:today()}};render()}
+function openEditEntrada(id){const r=ST.entradas.find(x=>x.id===id);if(!r)return;ST.modal={type:'entrada',editing:id,form:{...r}};render()}
+function saveEntrada(){
+  const{editing,form}=ST.modal;
+  if(!form.valor||isNaN(form.valor)){alert('Informe um valor válido.');return}
+  if(editing)ST.entradas=ST.entradas.map(r=>r.id===editing?{...form,id:editing}:r);
+  else ST.entradas=[...ST.entradas,{...form,id:uid()}];
+  autoSave('entradas','Lançamento salvo automaticamente ✓');
+  ST.modal=null;render();
+}
+
+// ═══════════════════════════════════════════════════
+// DISPENSAS
+// ═══════════════════════════════════════════════════
+function renderDispensas(){
+  const filt=ST.filter.dispensas,srch=ST.search.dispensas||'',data=ST.dispensas;
+  const total=data.reduce((s,r)=>s+Number(r.valor||0),0);
+  const filtered=data.filter(r=>(filt==='Todos'||r.categoria===filt)&&Object.values(r).some(v=>String(v||'').toLowerCase().includes(srch.toLowerCase())));
+  const rows=filtered.length===0?`<tr class="empty-row"><td colspan="6">Nenhum registro encontrado.</td></tr>`
+    :filtered.map(r=>`<tr>
+      <td>${r.data||'—'}</td>
+      <td><span class="badge bdg-despesa">${esc(r.categoria||'—')}</span></td>
+      <td>${esc(r.descricao||'—')}</td>
+      <td>${esc(r.responsavel||'—')}</td>
+      <td class="mono" style="color:#E88080">${brl(r.valor)}</td>
+      <td>
+        <button class="btn btn-edit-ghost" onclick="openEditDispensa('${r.id}')">✏</button>
+        <button class="btn btn-danger-ghost" onclick="removeRec('dispensas','${r.id}')">✕</button>
+      </td>
+    </tr>`).join('');
+  return `<div class="panel">
+    <div class="panel-head">
+      <span class="panel-title">📤 Dispensas / Saídas</span>
+      <div class="toolbar">
+        <input class="search-input" placeholder="Buscar…" value="${esc(srch)}" oninput="setSearch('dispensas',this.value)">
+        <button class="btn btn-gold" onclick="openNewDispensa()">+ Lançar</button>
+      </div>
+    </div>
+    <div class="filter-bar">
+      ${['Todos',...CATS].map(f=>`<button class="ftab ${filt===f?'active':''}" style="font-size:10px" onclick="setFilter('dispensas','${esc(f)}')">${f}</button>`).join('')}
+    </div>
+    <div class="sec-pad">
+      <div class="fin-row fin-c2">
+        <div class="fin-card"><span class="fa c-red">${brl(total)}</span><span class="fl">Total Saídas</span></div>
+        <div class="fin-card"><span class="fa c-gray">${data.length}</span><span class="fl">Lançamentos</span></div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Data</th><th>Categoria</th><th>Descrição</th><th>Responsável</th><th>Valor</th><th>Ações</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+function openNewDispensa(){ST.modal={type:'dispensa',editing:null,form:{data:today()}};render()}
+function openEditDispensa(id){const r=ST.dispensas.find(x=>x.id===id);if(!r)return;ST.modal={type:'dispensa',editing:id,form:{...r}};render()}
+function saveDispensa(){
+  const{editing,form}=ST.modal;
+  if(!form.valor||isNaN(form.valor)){alert('Informe um valor válido.');return}
+  if(editing)ST.dispensas=ST.dispensas.map(r=>r.id===editing?{...form,id:editing}:r);
+  else ST.dispensas=[...ST.dispensas,{...form,id:uid()}];
+  autoSave('dispensas','Dispensa salva automaticamente ✓');
+  ST.modal=null;render();
+}
+
+// ═══════════════════════════════════════════════════
+// BIRTHDAYS
+// ═══════════════════════════════════════════════════
+function renderBirthdays(){
+  const m=ST.bday.month,td=new Date();
+  const all=[...ST.membros.map(r=>({...r,_t:'Membro'})),...ST.congregados.map(r=>({...r,_t:'Congregado'})),...ST.obreiros.map(r=>({...r,_t:'Obreiro'}))];
+  const inM=all.filter(r=>{const d=r.dataNascimento;return d&&parseInt(d.split('-')[1],10)-1===m})
+    .sort((a,b)=>parseInt(a.dataNascimento.split('-')[2],10)-parseInt(b.dataNascimento.split('-')[2],10));
+  const isTd=r=>{const d=r.dataNascimento;if(!d)return false;const[,mo,dd]=d.split('-');return parseInt(mo,10)-1===td.getMonth()&&parseInt(dd,10)===td.getDate()};
+  const fmtD=r=>{const[,,dd]=r.dataNascimento.split('-');return `${parseInt(dd,10)} de ${MONTHS[m]}`};
+  const ini=n=>(n||'').split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
+  const mtabs=MONTHS.map((mn,i)=>`<button class="mtab ${ST.bday.month===i?'active':''}" onclick="setBdayM(${i})">${mn.slice(0,3)}</button>`).join('');
+  const cards=inM.length===0
+    ?`<div class="bday-empty">Nenhum aniversariante em ${MONTHS[m]}.<br>Certifique-se de cadastrar as datas de nascimento.</div>`
+    :`<div class="bday-grid">${inM.map(r=>{const tod=isTd(r);return`<div class="bday-card ${tod?'is-today':''}">
+        ${tod?'<span class="balloon">🎈</span>':''}
+        <div class="bday-avatar">${ini(r.nome)}</div>
+        <div class="bday-name">${esc(r.nome)}${tod?'<span class="today-tag">HOJE</span>':''}</div>
+        <div class="bday-date">🎂 ${fmtD(r)}</div>
+        <div class="bday-tipo">${esc(r.cargo||r._t)}</div>
+      </div>`}).join('')}</div>`;
+  return `<div class="panel">
+    <div class="panel-head">
+      <span class="panel-title" style="color:#F9A825">🎂 Aniversariantes do Mês</span>
+      <span style="font-size:11px;font-weight:600;color:#F9A825;background:rgba(249,168,37,.1);border:1px solid rgba(249,168,37,.25);border-radius:20px;padding:3px 12px">${inM.length} neste mês</span>
+    </div>
+    <div class="month-scroller">${mtabs}</div>
+    <div style="padding:10px 20px 0;font-family:'Cinzel',serif;font-size:13px;color:#F9A825;letter-spacing:1px">🎉 ${MONTHS[m]}</div>
+    ${cards}
+  </div>`;
+}
+function setBdayM(m){ST.bday.month=m;render()}
+
+// ═══════════════════════════════════════════════════
+// REPORTS
+// ═══════════════════════════════════════════════════
+function filterPeriod(arr,tipo,mes,ano){
+  if(tipo==='mensal')return arr.filter(r=>{if(!r.data)return false;const[y,m]=r.data.split('-');return parseInt(m,10)-1===mes&&parseInt(y,10)===ano});
+  if(tipo==='anual')return arr.filter(r=>r.data&&parseInt(r.data.split('-')[0],10)===ano);
+  return arr;
+}
+function renderReports(){
+  const{tipo,mes,ano}=ST.report;
+  const anos=[...new Set([...ST.entradas.map(r=>r.data?.split('-')[0]),...ST.dispensas.map(r=>r.data?.split('-')[0]),String(new Date().getFullYear())].filter(Boolean))].sort().reverse();
+  const ents=filterPeriod(ST.entradas,tipo,mes,ano);
+  const disps=filterPeriod(ST.dispensas,tipo,mes,ano);
+  const tDiz=ents.filter(r=>r.tipo==='Dízimo').reduce((s,r)=>s+Number(r.valor||0),0);
+  const tOf=ents.filter(r=>r.tipo==='Oferta').reduce((s,r)=>s+Number(r.valor||0),0);
+  const tEnt=tDiz+tOf,tDisp=disps.reduce((s,r)=>s+Number(r.valor||0),0),saldo=tEnt-tDisp;
+  const pl=tipo==='mensal'?`${MONTHS[mes]} / ${ano}`:tipo==='anual'?`Ano ${ano}`:'Período Completo';
+  const catMap={};disps.forEach(r=>{const c=r.categoria||'Outros';if(!catMap[c])catMap[c]=[];catMap[c].push(r)});
+  const catSumRows=Object.entries(catMap).map(([c,items])=>{const sub=items.reduce((s,r)=>s+Number(r.valor||0),0);return`<tr><td colspan="2">${esc(c)}</td><td style="text-align:right;color:#E88080">${brl(sub)}</td></tr>`}).join('');
+  const previewRows=ents.slice(0,7).map(r=>`<tr><td>${r.data||'—'}</td><td><span class="badge ${r.tipo==='Dízimo'?'bdg-dizimo':'bdg-oferta'}">${r.tipo}</span></td><td>${esc(r.membro||'—')}</td><td class="mono" style="color:#6FCF97">${brl(r.valor)}</td></tr>`).join('');
+  return `<div class="panel">
+    <div class="panel-head">
+      <span class="panel-title" style="color:#7EB8D4">📊 Relatórios Financeiros</span>
+      <button class="btn btn-blue" onclick="printReport()">🖨 Gerar Relatório PDF</button>
+    </div>
+    <div class="rep-controls">
+      <div class="rc-group">
+        <label>Tipo de Relatório</label>
+        <select onchange="setRep('tipo',this.value)">
+          <option value="mensal" ${tipo==='mensal'?'selected':''}>Mensal</option>
+          <option value="anual" ${tipo==='anual'?'selected':''}>Anual</option>
+          <option value="geral" ${tipo==='geral'?'selected':''}>Geral (todos)</option>
+        </select>
+      </div>
+      ${tipo!=='geral'?`<div class="rc-group"><label>Ano</label><select onchange="setRep('ano',this.value)">${anos.map(a=>`<option value="${a}" ${String(ano)===a?'selected':''}>${a}</option>`).join('')}</select></div>`:''}
+      ${tipo==='mensal'?`<div class="rc-group"><label>Mês</label><select onchange="setRep('mes',this.value)">${MONTHS.map((mn,i)=>`<option value="${i}" ${mes===i?'selected':''}>${mn}</option>`).join('')}</select></div>`:''}
+      <div style="margin-left:auto;display:flex;align-items:flex-end">
+        <button class="btn btn-blue" onclick="printReport()">🖨 Imprimir — ${pl}</button>
+      </div>
+    </div>
+    <div class="sec-pad">
+      <div class="fin-row fin-c4">
+        <div class="fin-card"><span class="fa c-blue">${brl(tDiz)}</span><span class="fl">Dízimos</span></div>
+        <div class="fin-card"><span class="fa c-gold">${brl(tOf)}</span><span class="fl">Ofertas</span></div>
+        <div class="fin-card"><span class="fa c-red">${brl(tDisp)}</span><span class="fl">Dispensas</span></div>
+        <div class="fin-card" style="border-color:${saldo>=0?'rgba(111,207,151,.3)':'rgba(232,128,128,.3)'}"><span class="fa" style="color:${saldo>=0?'#6FCF97':'#E88080'}">${brl(saldo)}</span><span class="fl">Saldo</span></div>
+      </div>
+      <p class="sec-label" style="color:#7EB8D4">📥 Entradas (${ents.length} registros)</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Data</th><th>Tipo</th><th>Membro</th><th>Valor</th></tr></thead>
+          <tbody>
+            ${ents.length===0?`<tr class="empty-row"><td colspan="4">Nenhuma entrada no período.</td></tr>`:previewRows}
+            ${ents.length>7?`<tr class="empty-row"><td colspan="4">… e mais ${ents.length-7} registros. Imprima para ver o relatório completo.</td></tr>`:''}
+            ${ents.length>0?`<tr style="background:rgba(92,107,46,.12)"><td colspan="3" style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,154,42,.7);text-transform:uppercase">TOTAL</td><td class="mono" style="color:#6FCF97;font-weight:700">${brl(tEnt)}</td></tr>`:''}
+          </tbody>
+        </table>
+      </div>
+      <p class="sec-label" style="color:#E88080;margin-top:14px">📤 Dispensas por Categoria (${disps.length} registros)</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th colspan="2">Categoria</th><th>Subtotal</th></tr></thead>
+          <tbody>
+            ${Object.keys(catMap).length===0?`<tr class="empty-row"><td colspan="3">Nenhuma dispensa no período.</td></tr>`:catSumRows}
+            ${Object.keys(catMap).length>0?`<tr style="background:rgba(139,42,42,.1)"><td colspan="2" style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:rgba(196,154,42,.7);text-transform:uppercase">TOTAL</td><td class="mono" style="color:#E88080;font-weight:700">${brl(tDisp)}</td></tr>`:''}
+          </tbody>
+        </table>
+      </div>
+      <div class="result-box ${saldo>=0?'pos':'neg'}">
+        <span class="rl">RESULTADO — ${pl.toUpperCase()}</span>
+        <span class="rv" style="color:${saldo>=0?'#6FCF97':'#E88080'}">${brl(saldo)}</span>
+      </div>
+      <div class="print-cta">
+        <button class="btn btn-blue" style="padding:12px 32px;font-size:12px;letter-spacing:2px" onclick="printReport()">🖨 IMPRIMIR RELATÓRIO COMPLETO</button>
+        <p class="print-cta-note">Abre janela de impressão — selecione "Salvar como PDF" para exportar o documento.</p>
+      </div>
+    </div>
+  </div>`;
+}
+function setRep(f,v){if(f==='mes'||f==='ano')ST.report[f]=Number(v);else ST.report[f]=v;render()}
+
+// ═══════════════════════════════════════════════════
+// PRINT
+// ═══════════════════════════════════════════════════
+function printReport(){
+  const{tipo,mes,ano}=ST.report;
+  const ents=filterPeriod(ST.entradas,tipo,mes,ano).sort((a,b)=>(a.data||'').localeCompare(b.data||''));
+  const disps=filterPeriod(ST.dispensas,tipo,mes,ano).sort((a,b)=>(a.data||'').localeCompare(b.data||''));
+  const tDiz=ents.filter(r=>r.tipo==='Dízimo').reduce((s,r)=>s+Number(r.valor||0),0);
+  const tOf=ents.filter(r=>r.tipo==='Oferta').reduce((s,r)=>s+Number(r.valor||0),0);
+  const tEnt=tDiz+tOf,tDisp=disps.reduce((s,r)=>s+Number(r.valor||0),0),saldo=tEnt-tDisp;
+  const pl=tipo==='mensal'?`${MONTHS[mes]} / ${ano}`:tipo==='anual'?`Ano ${ano}`:'Período Completo';
+  const gen=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  const catMap={};disps.forEach(r=>{const c=r.categoria||'Outros';if(!catMap[c])catMap[c]=[];catMap[c].push(r)});
+  const logoTag=ST.logo?`<img style="width:68px;height:68px;border-radius:50%;border:2px solid #3D4A1A;object-fit:cover" src="${ST.logo}" alt="Logo">`:`<div style="width:68px;height:68px;border-radius:50%;border:2px solid #3D4A1A;display:inline-flex;align-items:center;justify-content:center;font-size:28px;background:#edf2e8">✝</div>`;
+  const entRows=ents.map(r=>`<tr><td>${r.data||'—'}</td><td><b>${esc(r.tipo||'—')}</b></td><td>${esc(r.membro||'—')}</td><td>${esc(r.descricao||'—')}</td><td style="text-align:right;color:#2E7D32;font-weight:600">${brl(r.valor)}</td></tr>`).join('');
+  const catBlocks=Object.entries(catMap).map(([cat,items])=>{const sub=items.reduce((s,r)=>s+Number(r.valor||0),0);return`<div style="margin-bottom:18px"><div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:#3D4A1A;text-transform:uppercase;letter-spacing:1px;padding:5px 10px;background:#edf2e8;border-left:3px solid #3D4A1A;margin-bottom:6px">${esc(cat)}</div><table><thead><tr><th>Data</th><th>Descrição</th><th>Responsável</th><th style="text-align:right">Valor</th></tr></thead><tbody>${items.map(r=>`<tr><td>${r.data||'—'}</td><td>${esc(r.descricao||'—')}</td><td>${esc(r.responsavel||'—')}</td><td style="text-align:right;color:#C62828;font-weight:600">${brl(r.valor)}</td></tr>`).join('')}<tr class="tot"><td colspan="3">Subtotal — ${esc(cat)}</td><td style="text-align:right;color:#C62828">${brl(sub)}</td></tr></tbody></table></div>`}).join('');
+  const catSumRows=Object.entries(catMap).map(([c,items])=>{const sub=items.reduce((s,r)=>s+Number(r.valor||0),0);return`<tr><td colspan="3">${esc(c)}</td><td style="text-align:right;color:#C62828">${brl(sub)}</td></tr>`}).join('');
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Financeiro — ${pl}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Crimson Text',Georgia,serif;color:#000;background:#fff;padding:24px 32px}
+.doc{max-width:920px;margin:0 auto}
+.hd{text-align:center;border-bottom:3px double #3D4A1A;padding-bottom:16px;margin-bottom:20px}
+.logo-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:10px}
+.church{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#3D4A1A;letter-spacing:1px}
+.sub{font-size:11px;color:#666;letter-spacing:2.5px;text-transform:uppercase;margin-top:3px}
+.rep-ttl{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:#3D4A1A;margin-top:10px;letter-spacing:1px}
+.period{font-size:14px;color:#444;margin-top:5px}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+.sc{border:2px solid #3D4A1A;border-radius:7px;padding:12px 14px;text-align:center}
+.sv{font-family:'Cinzel',serif;font-size:17px;font-weight:700;display:block}
+.sl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#666;margin-top:3px}
+.p-g{color:#2E7D32}.p-r{color:#C62828}.p-b{color:#1565C0}.p-d{color:#3D4A1A}
+.sec{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:#3D4A1A;border-bottom:2px solid #3D4A1A;padding-bottom:5px;margin:24px 0 12px;letter-spacing:1px;text-transform:uppercase}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}
+th{background:#3D4A1A;color:#fff;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 10px;text-align:left}
+td{padding:7px 10px;border-bottom:1px solid #ddd}
+tr:nth-child(even) td{background:#f8f8f5}
+.tot td{font-weight:700;background:#edf2e8!important;border-top:2px solid #3D4A1A}
+.sb{border:2px solid #3D4A1A;border-radius:8px;padding:16px 22px;margin:20px 0;background:#edf2e8;display:flex;justify-content:space-between;align-items:center}
+.sl2{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:#3D4A1A;letter-spacing:1px}
+.sv2{font-family:'Cinzel',serif;font-size:24px;font-weight:700}
+.ft{margin-top:36px;border-top:2px solid #3D4A1A;padding-top:16px;display:flex;justify-content:space-between;align-items:flex-end}
+.fc{font-family:'Cinzel',serif;font-size:11px;color:#3D4A1A;letter-spacing:1px}
+.sig{text-align:center}
+.sgl{border-top:1px solid #000;width:240px;margin:0 auto 5px}
+.sgt{font-size:11px;color:#555}
+.gd{font-size:10px;color:#999;margin-top:6px}
+.emp{text-align:center;padding:20px;color:#999;font-style:italic;border:1px dashed #ccc;border-radius:5px;margin:8px 0}
+@media print{body{padding:6px 12px}@page{margin:1.2cm;size:A4}}
+</style></head><body><div class="doc">
+<div class="hd">
+  <div class="logo-row">${logoTag}<div><div class="church">Ministério Evangélico Enraizados</div><div class="sub">Sistema de Gestão da Igreja</div></div></div>
+  <div class="rep-ttl">📊 Relatório Financeiro</div>
+  <div class="period">Período: <strong>${pl}</strong></div>
+</div>
+<div class="sg">
+  <div class="sc"><span class="sv p-b">${brl(tDiz)}</span><span class="sl">Dízimos</span></div>
+  <div class="sc"><span class="sv p-d">${brl(tOf)}</span><span class="sl">Ofertas</span></div>
+  <div class="sc"><span class="sv p-r">${brl(tDisp)}</span><span class="sl">Dispensas</span></div>
+  <div class="sc"><span class="sv ${saldo>=0?'p-g':'p-r'}">${brl(saldo)}</span><span class="sl">Saldo do Período</span></div>
+</div>
+<div class="sec">📥 Entradas — Dízimos e Ofertas (${ents.length} registros)</div>
+${ents.length===0?`<div class="emp">Nenhuma entrada no período selecionado.</div>`:`<table><thead><tr><th>Data</th><th>Tipo</th><th>Membro</th><th>Descrição</th><th style="text-align:right">Valor</th></tr></thead><tbody>${entRows}<tr class="tot"><td colspan="4"><strong>TOTAL DE ENTRADAS</strong></td><td style="text-align:right;color:#2E7D32"><strong>${brl(tEnt)}</strong></td></tr></tbody></table>`}
+<div class="sec">📤 Dispensas por Categoria (${disps.length} registros)</div>
+${disps.length===0?`<div class="emp">Nenhuma dispensa no período selecionado.</div>`:catBlocks+`<table><thead><tr><th colspan="3">Resumo por Categoria</th><th style="text-align:right">Total</th></tr></thead><tbody>${catSumRows}<tr class="tot"><td colspan="3"><strong>TOTAL DE DISPENSAS</strong></td><td style="text-align:right;color:#C62828"><strong>${brl(tDisp)}</strong></td></tr></tbody></table>`}
+<div class="sb">
+  <div class="sl2">RESULTADO DO PERÍODO — ${pl.toUpperCase()}</div>
+  <div><span style="font-size:12px;color:#666;margin-right:10px">Entradas ${brl(tEnt)} − Dispensas ${brl(tDisp)} =</span><span class="sv2 ${saldo>=0?'p-g':'p-r'}">${brl(saldo)}</span></div>
+</div>
+<div class="ft">
+  <div class="fc">✝ Ministério Evangélico Enraizados<br><span style="font-size:10px;color:#999;font-family:Georgia,serif">Sistema de Gestão da Igreja</span></div>
+  <div class="sig"><div class="sgl"></div><div class="sgt">Assinatura do Responsável / Tesoureiro(a)</div><div class="gd">Relatório gerado em ${gen}</div></div>
+</div>
+</div><script>window.onload=function(){window.print()}<\/script></body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();
+}
+
+// ═══════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════
+function renderModal(){
+  const m=ST.modal;if(!m)return'';
+  if(m.type==='person')return renderPersonModal();
+  if(m.type==='entrada')return renderEntradaModal();
+  if(m.type==='dispensa')return renderDispensaModal();
+  if(m.type==='settings')return renderSettingsModal();
+  return'';
+}
+function closeModal(){ST.modal=null;render()}
+function mw(title,body){
+  return`<div class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <div class="modal-head"><h2>${title}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+      <div class="modal-body">${body}</div>
+    </div>
+  </div>`;
+}
+
+// ── PERSON MODAL ──
+function renderPersonModal(){
+  const{entity,editing,form}=ST.modal;const fields=PFIELDS[entity];
+  const SING={membros:'Membro',congregados:'Congregado',obreiros:'Obreiro'};
+  const body=`<div class="fgrid">${fields.map(f=>`<div class="fg ${f.full?'full':''}">
+    <label>${f.l}${f.req?' *':''}</label>
+    ${f.t==='sel'?`<select onchange="sf('${f.k}',this.value)"><option value="">— Selecione —</option>${f.opts.map(o=>`<option value="${esc(o)}" ${form[f.k]===o?'selected':''}>${esc(o)}</option>`).join('')}</select>`
+    :f.t==='ta'?`<textarea rows="3" onchange="sf('${f.k}',this.value)">${esc(form[f.k]||'')}</textarea>`
+    :`<input type="${f.t||'text'}" value="${esc(form[f.k]||'')}" onchange="sf('${f.k}',this.value)">`}
+  </div>`).join('')}</div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-gold" onclick="saveRec()">${editing?'Salvar Alterações':'Cadastrar'}</button>
+  </div>`;
+  return mw(`${editing?'Editar':'Novo'} ${SING[entity]}`,body);
+}
+
+// ── ENTRADA MODAL ──
+function renderEntradaModal(){
+  const{editing,form}=ST.modal;
+  const body=`<div class="fgrid">
+    <div class="fg"><label>Tipo *</label><select onchange="sf('tipo',this.value)"><option value="Dízimo" ${form.tipo==='Dízimo'?'selected':''}>Dízimo</option><option value="Oferta" ${form.tipo==='Oferta'?'selected':''}>Oferta</option></select></div>
+    <div class="fg"><label>Data *</label><input type="date" value="${form.data||''}" onchange="sf('data',this.value)"></div>
+    <div class="fg"><label>Valor (R$) *</label><input type="number" step="0.01" min="0" value="${form.valor||''}" onchange="sf('valor',this.value)" placeholder="0,00"></div>
+    <div class="fg"><label>Membro</label><select onchange="sf('membro',this.value)"><option value="">— Selecione —</option>${ST.membros.map(m=>`<option value="${esc(m.nome)}" ${form.membro===m.nome?'selected':''}>${esc(m.nome)}</option>`).join('')}</select></div>
+    <div class="fg full"><label>Descrição / Observação</label><input type="text" value="${esc(form.descricao||'')}" onchange="sf('descricao',this.value)" placeholder="Opcional…"></div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-gold" onclick="saveEntrada()">${editing?'Salvar Alterações':'Lançar Entrada'}</button>
+  </div>`;
+  return mw(editing?'Editar Lançamento':'Nova Entrada Financeira',body);
+}
+
+// ── DISPENSA MODAL ──
+function renderDispensaModal(){
+  const{editing,form}=ST.modal;
+  const body=`<div class="fgrid">
+    <div class="fg"><label>Categoria *</label><select onchange="sf('categoria',this.value)"><option value="">— Selecione —</option>${CATS.map(c=>`<option value="${esc(c)}" ${form.categoria===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+    <div class="fg"><label>Data *</label><input type="date" value="${form.data||''}" onchange="sf('data',this.value)"></div>
+    <div class="fg"><label>Valor (R$) *</label><input type="number" step="0.01" min="0" value="${form.valor||''}" onchange="sf('valor',this.value)" placeholder="0,00"></div>
+    <div class="fg"><label>Responsável</label><input type="text" value="${esc(form.responsavel||'')}" onchange="sf('responsavel',this.value)" placeholder="Nome do responsável"></div>
+    <div class="fg full"><label>Descrição</label><input type="text" value="${esc(form.descricao||'')}" onchange="sf('descricao',this.value)" placeholder="Descreva a despesa…"></div>
+    <div class="fg full"><label>Nota Fiscal / Comprovante</label><input type="text" value="${esc(form.nota||'')}" onchange="sf('nota',this.value)" placeholder="Número ou referência"></div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+    <button class="btn btn-gold" onclick="saveDispensa()">${editing?'Salvar Alterações':'Lançar Dispensa'}</button>
+  </div>`;
+  return mw(editing?'Editar Dispensa':'Nova Dispensa / Saída',body);
+}
+function sf(k,v){if(ST.modal?.form)ST.modal.form[k]=v}
+
+// ── SETTINGS MODAL ──
+function openSettings(){ST.modal={type:'settings',msg:null};render()}
+function renderSettingsModal(){
+  const creds=ls('igr-credentials')||{usuario:'admin',senha:'1234'};
+  const{msg}=ST.modal;
+  const feedbackHtml=msg?`<div class="${msg.ok?'feedback-ok':'feedback-err'}">${msg.text}</div>`:'';
+  const logoSection=`<div class="sett-section">
+    <div class="sett-title">Logo da Igreja</div>
+    <div class="logo-upload-area ${ST.logo?'has-logo':''}" onclick="document.getElementById('settings-logo').click()">
+      ${ST.logo?`<img src="${ST.logo}" alt="Logo atual">`:'<div style="font-size:36px;opacity:.4">🖼</div>'}
+      <span class="logo-upload-label">${ST.logo?'Clique para trocar o logo':'Clique para enviar o logo da igreja'}</span>
+      <span class="logo-upload-hint">PNG, JPG ou GIF — recomendado 200×200px</span>
+    </div>
+    <input id="settings-logo" type="file" accept="image/*" style="display:none" onchange="handleLogoSettings(this)">
+    ${ST.logo?`<div style="margin-top:8px"><button class="btn btn-danger-ghost" onclick="removeLogo()">✕ Remover logo atual</button></div>`:''}
+  </div>`;
+  const body=`${logoSection}
+  <div class="sett-section">
+    <div class="sett-title">Credenciais de Acesso</div>
+    <div class="fgrid">
+      <div class="fg full"><label>Usuário</label><input type="text" id="s-user" value="${esc(creds.usuario)}"></div>
+      <div class="fg"><label>Nova Senha</label><input type="password" id="s-pass" placeholder="Em branco = manter atual"></div>
+      <div class="fg"><label>Confirmar Senha</label><input type="password" id="s-conf" placeholder="Repita a nova senha"></div>
+    </div>
+    ${feedbackHtml}
+    <div class="form-actions"><button class="btn btn-gold" onclick="saveSettings()">💾 Salvar Credenciais</button></div>
+  </div>
+  <div class="sett-section">
+    <div class="sett-title danger">Sessão</div>
+    <button class="btn btn-danger-ghost" style="padding:9px 18px;font-size:11px" onclick="confirmExit()">⏻ Sair do Sistema</button>
+  </div>`;
+  return mw('⚙ Configurações',body);
+}
+function handleLogoSettings(input){
+  const f=input.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{ST.logo=ev.target.result;autoSave('logo','Logo salvo com sucesso ✓');render()};
+  reader.readAsDataURL(f);
+}
+function removeLogo(){
+  if(!confirm('Remover o logo atual?'))return;
+  ST.logo=null;ss('igr-logo',null);showToast('Logo removido ✓');render();
+}
+function saveSettings(){
+  const u=document.getElementById('s-user')?.value.trim();
+  const p=document.getElementById('s-pass')?.value;
+  const c=document.getElementById('s-conf')?.value;
+  if(!u){ST.modal.msg={ok:false,text:'O usuário não pode ser vazio.'};render();return}
+  if(p&&p!==c){ST.modal.msg={ok:false,text:'As senhas não coincidem.'};render();return}
+  const cur=ls('igr-credentials')||{usuario:'admin',senha:'1234'};
+  ss('igr-credentials',{usuario:u,senha:p||cur.senha});
+  ST.modal.msg={ok:true,text:'✓ Credenciais atualizadas e salvas com sucesso!'};
+  render();
+}
+
+// ═══════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════
+render();
+</script>
+</body>
+</html>
